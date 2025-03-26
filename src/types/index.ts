@@ -35,3 +35,20 @@ export interface NFT {
   listedAt?: Date;
   purchasedAt?: Date;
 }
+
+// ThirdWeb NFT metadata 
+export interface ThirdWebNFTMetadata {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  uri: string;
+  properties: Record<string, any>;
+}
+
+// ThirdWeb NFT
+export interface ThirdWebNFT {
+  metadata: ThirdWebNFTMetadata;
+  owner: string;
+  type: string;
+}

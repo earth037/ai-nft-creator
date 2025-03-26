@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { WalletProvider } from "@/context/WalletContext";
 import { NFTProvider } from "@/context/NFTContext";
+import { ThirdWebProviderWrapper } from "@/context/ThirdWebContext";
 
 // Pages
 import Home from "./pages/Home";
@@ -21,21 +22,23 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <WalletProvider>
-        <NFTProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/create" element={<Create />} />
-                <Route path="/listed-items" element={<ListedItems />} />
-                <Route path="/purchased-items" element={<PurchasedItems />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </NFTProvider>
+        <ThirdWebProviderWrapper>
+          <NFTProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/create" element={<Create />} />
+                  <Route path="/listed-items" element={<ListedItems />} />
+                  <Route path="/purchased-items" element={<PurchasedItems />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </NFTProvider>
+        </ThirdWebProviderWrapper>
       </WalletProvider>
     </ThemeProvider>
   </QueryClientProvider>
