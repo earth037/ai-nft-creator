@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface UseImageGenerationReturn {
   generatedImage: string | null;
@@ -20,10 +21,8 @@ export function useImageGeneration(): UseImageGenerationReturn {
     setError(null);
     
     try {
-      // For demo purposes, we'll use a mock response
-      // In a real app, you would make an actual API call to Hugging Face
+      console.log("Generating image with prompt:", prompt);
       
-      /* Real API call would be something like:
       const response = await fetch(
         "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
         {
@@ -37,26 +36,28 @@ export function useImageGeneration(): UseImageGenerationReturn {
       );
       
       if (!response.ok) {
-        throw new Error(`Error generating image: ${response.statusText}`);
+        const errorData = await response.json().catch(() => null);
+        const errorMessage = errorData?.error || `Error generating image: ${response.statusText}`;
+        throw new Error(errorMessage);
       }
       
       const blob = await response.blob();
       const imageUrl = URL.createObjectURL(blob);
-      */
       
-      // For demo, simulate a delay and use a placeholder image
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      
-      // Generate a random image from Unsplash for demo purposes
-      const seed = Math.floor(Math.random() * 1000);
-      const imageUrl = `https://picsum.photos/seed/${seed}/800/800`;
-      
+      console.log("Image generated successfully:", imageUrl);
       setGeneratedImage(imageUrl);
       return imageUrl;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      console.error("Image generation error:", errorMessage);
       setError(errorMessage);
-      throw new Error(errorMessage);
+      
+      // Fallback to a placeholder image if the API fails
+      toast.error("API error: Using a placeholder image instead");
+      const seed = Math.floor(Math.random() * 1000);
+      const fallbackImageUrl = `https://picsum.photos/seed/${seed}/800/800`;
+      setGeneratedImage(fallbackImageUrl);
+      return fallbackImageUrl;
     } finally {
       setGenerating(false);
     }

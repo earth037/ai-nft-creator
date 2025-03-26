@@ -1,5 +1,5 @@
-
 import { createContext, useContext, useState, useEffect } from "react";
+import { toast } from "sonner";
 
 export interface WalletContextType {
   address: string | null;
@@ -17,31 +17,59 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
 
-  // Check for saved wallet on mount
   useEffect(() => {
     const savedAddress = localStorage.getItem("walletAddress");
     if (savedAddress) {
       setAddress(savedAddress);
       setIsConnected(true);
     }
+    
+    if (typeof window.ethereum === "undefined") {
+      console.log("MetaMask is not installed!");
+    }
   }, []);
 
-  // Mock function to simulate connecting to wallet
+  useEffect(() => {
+    if (window.ethereum) {
+      const handleAccountsChanged = (accounts: string[]) => {
+        if (accounts.length === 0) {
+          disconnectWallet();
+        } else if (accounts[0] !== address) {
+          setAddress(accounts[0]);
+          setIsConnected(true);
+          localStorage.setItem("walletAddress", accounts[0]);
+        }
+      };
+
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+
+      return () => {
+        if (window.ethereum.removeListener) {
+          window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        }
+      };
+    }
+  }, [address]);
+
   const connectWallet = async (): Promise<void> => {
+    if (!window.ethereum) {
+      toast.error("MetaMask is not installed. Please install MetaMask to connect.");
+      return;
+    }
+
     try {
       setConnecting(true);
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Generate a random ETH address for demo
-      const mockAddress = `0x${Array.from({length: 40}, () => 
-        Math.floor(Math.random() * 16).toString(16)).join('')}`;
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       
-      setAddress(mockAddress);
-      setIsConnected(true);
-      localStorage.setItem("walletAddress", mockAddress);
+      if (accounts.length > 0) {
+        setAddress(accounts[0]);
+        setIsConnected(true);
+        localStorage.setItem("walletAddress", accounts[0]);
+      }
     } catch (error) {
-      console.error("Error connecting wallet:", error);
+      console.error("Error connecting to MetaMask:", error);
+      toast.error("Failed to connect wallet. Please try again.");
     } finally {
       setConnecting(false);
     }
