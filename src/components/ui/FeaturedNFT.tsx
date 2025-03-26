@@ -1,5 +1,5 @@
 
-import { NFT } from "@/context/NFTContext";
+import { NFT } from "@/types";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useNFTs } from "@/context/NFTContext";

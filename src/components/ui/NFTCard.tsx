@@ -1,5 +1,5 @@
 
-import { NFT } from "@/context/NFTContext";
+import { NFT } from "@/types";
 import { useWallet } from "@/context/WalletContext";
 import { useNFTs } from "@/context/NFTContext";
 import { Button } from "@/components/ui/button";
