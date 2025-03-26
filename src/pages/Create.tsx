@@ -153,7 +153,12 @@ export default function Create() {
                       </select>
                       <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                         {currencyOptions.find((option) => option.value === currency)?.icon && (
-                          <currencyOptions.find((option) => option.value === currency)!.icon className="h-4 w-4 text-muted-foreground" />
+                          (() => {
+                            const IconComponent = currencyOptions.find(
+                              (option) => option.value === currency
+                            )!.icon;
+                            return <IconComponent className="h-4 w-4 text-muted-foreground" />;
+                          })()
                         )}
                       </div>
                     </div>
