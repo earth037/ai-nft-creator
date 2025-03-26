@@ -1,26 +1,43 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { ThemeProvider } from "@/context/ThemeContext";
+import { WalletProvider } from "@/context/WalletContext";
+import { NFTProvider } from "@/context/NFTContext";
+
+// Pages
+import Home from "./pages/Home";
+import Create from "./pages/Create";
+import ListedItems from "./pages/ListedItems";
+import PurchasedItems from "./pages/PurchasedItems";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider>
+      <WalletProvider>
+        <NFTProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/create" element={<Create />} />
+                <Route path="/listed-items" element={<ListedItems />} />
+                <Route path="/purchased-items" element={<PurchasedItems />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </NFTProvider>
+      </WalletProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
