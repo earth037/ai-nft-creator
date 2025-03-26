@@ -1,26 +1,14 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
-
-export interface NFT {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-  price: string;
-  currency: string;
-  creator: string;
-  owner: string;
-  createdAt: Date;
-  listedAt?: Date;
-  purchasedAt?: Date;
-}
+import { useWallet } from "@/context/WalletContext";
+import { NFT } from "@/types";
 
 interface NFTContextType {
   nfts: NFT[];
   listedNFTs: NFT[];
   purchasedNFTs: NFT[];
   featuredNFTs: NFT[];
-  mintNFT: (nft: Omit<NFT, "id" | "createdAt" | "listedAt">) => Promise<void>;
+  mintNFT: (nft: Omit<NFT, "id" | "createdAt" | "listedAt" | "network">) => Promise<void>;
   purchaseNFT: (id: string) => Promise<void>;
   searchNFTs: (query: string) => NFT[];
   loading: boolean;
@@ -39,6 +27,7 @@ const mockNFTs: NFT[] = [
     currency: "ETH",
     creator: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
     owner: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    network: "0x1", // Ethereum Mainnet
     createdAt: new Date("2023-01-15"),
     listedAt: new Date("2023-01-15"),
   },
@@ -51,6 +40,7 @@ const mockNFTs: NFT[] = [
     currency: "ETH",
     creator: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
     owner: "0x954c27a12cd397024231b5e0bfa042f3f066d410",
+    network: "0x5", // Goerli Testnet
     createdAt: new Date("2023-02-20"),
     listedAt: new Date("2023-02-21"),
     purchasedAt: new Date("2023-02-25"),
@@ -64,6 +54,7 @@ const mockNFTs: NFT[] = [
     currency: "ETH",
     creator: "0x954c27a12cd397024231b5e0bfa042f3f066d410",
     owner: "0x954c27a12cd397024231b5e0bfa042f3f066d410",
+    network: "0x89", // Polygon Mainnet
     createdAt: new Date("2023-03-10"),
     listedAt: new Date("2023-03-12"),
   },
@@ -76,6 +67,7 @@ const mockNFTs: NFT[] = [
     currency: "ETH",
     creator: "0x954c27a12cd397024231b5e0bfa042f3f066d410",
     owner: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    network: "0x1", // Ethereum Mainnet
     createdAt: new Date("2023-04-05"),
     listedAt: new Date("2023-04-07"),
     purchasedAt: new Date("2023-04-10"),
@@ -89,6 +81,7 @@ const mockNFTs: NFT[] = [
     currency: "ETH",
     creator: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
     owner: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+    network: "0x13881", // Mumbai Testnet
     createdAt: new Date("2023-05-15"),
     listedAt: new Date("2023-05-16"),
   },
@@ -97,14 +90,23 @@ const mockNFTs: NFT[] = [
 export function NFTProvider({ children }: { children: React.ReactNode }) {
   const [nfts, setNfts] = useState<NFT[]>(mockNFTs);
   const [loading, setLoading] = useState(false);
+  const { networkId, address } = useWallet();
 
-  // Filter NFTs based on their status
-  const listedNFTs = nfts.filter(nft => nft.listedAt && !nft.purchasedAt);
-  const purchasedNFTs = nfts.filter(nft => nft.purchasedAt);
-  const featuredNFTs = [...nfts].sort(() => 0.5 - Math.random()).slice(0, 3);
+  // Filter NFTs based on their status and current network
+  const filteredNFTs = networkId 
+    ? nfts.filter(nft => nft.network === networkId) 
+    : nfts;
+
+  const listedNFTs = filteredNFTs.filter(nft => nft.listedAt && !nft.purchasedAt);
+  const purchasedNFTs = filteredNFTs.filter(nft => nft.purchasedAt);
+  
+  // Featured NFTs should also be from the current network
+  const featuredNFTs = [...filteredNFTs]
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 3);
 
   // Mint a new NFT
-  const mintNFT = async (nftData: Omit<NFT, "id" | "createdAt" | "listedAt">): Promise<void> => {
+  const mintNFT = async (nftData: Omit<NFT, "id" | "createdAt" | "listedAt" | "network">): Promise<void> => {
     setLoading(true);
     try {
       // Simulate network delay
@@ -113,6 +115,7 @@ export function NFTProvider({ children }: { children: React.ReactNode }) {
       const newNFT: NFT = {
         ...nftData,
         id: Math.random().toString(36).substring(2, 9),
+        network: networkId, // Assign the current network
         createdAt: new Date(),
         listedAt: new Date(),
       };
@@ -135,7 +138,7 @@ export function NFTProvider({ children }: { children: React.ReactNode }) {
       
       setNfts(prev => prev.map(nft => 
         nft.id === id 
-          ? { ...nft, purchasedAt: new Date(), owner: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e" } 
+          ? { ...nft, purchasedAt: new Date(), owner: address || "Unknown" } 
           : nft
       ));
     } catch (error) {

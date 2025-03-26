@@ -19,3 +19,19 @@ declare global {
     };
   }
 }
+
+// Define NFT interface for consistency across the application
+export interface NFT {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+  price: string;
+  currency: string;
+  creator: string;
+  owner: string;
+  network?: string;
+  createdAt: Date;
+  listedAt?: Date;
+  purchasedAt?: Date;
+}

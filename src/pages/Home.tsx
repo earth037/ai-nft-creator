@@ -1,19 +1,29 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { NFTCard } from "@/components/ui/NFTCard";
 import { FeaturedNFT } from "@/components/ui/FeaturedNFT";
 import { SearchBar } from "@/components/ui/SearchBar";
 import { useNFTs } from "@/context/NFTContext";
-import { NFT } from "@/context/NFTContext";
+import { useWallet } from "@/context/WalletContext";
+import { NFT } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function Home() {
   const { listedNFTs, featuredNFTs } = useNFTs();
+  const { isConnected, networkId } = useWallet();
   const [searchResults, setSearchResults] = useState<NFT[]>(listedNFTs);
   const [isSearchActive, setIsSearchActive] = useState(false);
+
+  useEffect(() => {
+    // Update search results when listedNFTs changes (due to network change)
+    if (!isSearchActive) {
+      setSearchResults(listedNFTs);
+    }
+  }, [listedNFTs, isSearchActive]);
 
   const handleSearch = (results: NFT[]) => {
     setSearchResults(results);
@@ -74,8 +84,28 @@ export default function Home() {
         {/* Featured NFT Section */}
         <section className="py-16 bg-secondary/30">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold mb-8">Featured NFT</h2>
-            {featuredNFTs.length > 0 && <FeaturedNFT nft={featuredNFTs[0]} />}
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-bold">Featured NFT</h2>
+              {networkId && (
+                <div className="px-3 py-1 bg-primary/10 rounded-full text-sm">
+                  <span className="text-primary">Network: </span>
+                  <span>{getNetworkName(networkId)}</span>
+                </div>
+              )}
+            </div>
+            
+            {featuredNFTs.length > 0 ? (
+              <FeaturedNFT nft={featuredNFTs[0]} />
+            ) : (
+              <div className="text-center py-20 glass rounded-xl">
+                <h3 className="text-2xl font-semibold mb-2">No NFTs on this network</h3>
+                <p className="text-muted-foreground mb-6">
+                  {isConnected 
+                    ? "There are no NFTs available on your current network. Try changing networks or create your own NFT!"
+                    : "Connect your wallet to see NFTs on your network"}
+                </p>
+              </div>
+            )}
           </div>
         </section>
 
@@ -108,10 +138,22 @@ export default function Home() {
               </div>
             </div>
 
-            {searchResults.length === 0 ? (
-              <div className="text-center py-20">
-                <h3 className="text-2xl font-semibold mb-2">No NFTs found</h3>
-                <p className="text-muted-foreground mb-6">Try adjusting your search or create your own NFT</p>
+            {!isConnected ? (
+              <div className="text-center py-20 glass rounded-xl">
+                <h3 className="text-2xl font-semibold mb-2">Connect Wallet to View NFTs</h3>
+                <p className="text-muted-foreground mb-6">Please connect your wallet to see NFTs on your current network</p>
+                <Button onClick={() => toast.info("Click the Connect Wallet button in the navigation bar")}>
+                  Connect Wallet
+                </Button>
+              </div>
+            ) : searchResults.length === 0 ? (
+              <div className="text-center py-20 glass rounded-xl">
+                <h3 className="text-2xl font-semibold mb-2">No NFTs Found</h3>
+                <p className="text-muted-foreground mb-6">
+                  {isSearchActive 
+                    ? "No NFTs match your search criteria. Try a different search or clear filters." 
+                    : "No NFTs available on your current network. Try creating your own!"}
+                </p>
                 <Button asChild>
                   <Link to="/create">Create NFT</Link>
                 </Button>
@@ -143,4 +185,22 @@ export default function Home() {
       <Footer />
     </div>
   );
+}
+
+// Helper function to convert network IDs to readable names
+function getNetworkName(networkId: string): string {
+  switch (networkId) {
+    case '0x1':
+      return 'Ethereum Mainnet';
+    case '0x5':
+      return 'Goerli Testnet';
+    case '0xaa36a7':
+      return 'Sepolia Testnet';
+    case '0x89':
+      return 'Polygon Mainnet';
+    case '0x13881':
+      return 'Mumbai Testnet';
+    default:
+      return `Chain ${networkId}`;
+  }
 }

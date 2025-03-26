@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useOutsideClick } from "@/hooks/useOutsideClick";
 
 export function WalletButton() {
-  const { isConnected, connecting, address, connectWallet, disconnectWallet, changeWallet } = useWallet();
+  const { isConnected, connecting, address, walletInfo, connectWallet, disconnectWallet, changeWallet } = useWallet();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -55,10 +55,23 @@ export function WalletButton() {
       </Button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-60 p-2 rounded-lg glass animate-fadeIn z-50">
+        <div className="absolute right-0 mt-2 w-72 p-2 rounded-lg glass animate-fadeIn z-50">
           <div className="p-3 mb-2 rounded-md bg-secondary/50 backdrop-blur-sm">
             <p className="text-xs text-muted-foreground">Connected Wallet</p>
             <p className="font-mono text-sm truncate">{address}</p>
+            
+            {walletInfo && (
+              <>
+                <div className="mt-2 pt-2 border-t border-border/40">
+                  <p className="text-xs text-muted-foreground">Network</p>
+                  <p className="font-medium text-sm">{walletInfo.network}</p>
+                </div>
+                <div className="mt-2 pt-2 border-t border-border/40">
+                  <p className="text-xs text-muted-foreground">Balance</p>
+                  <p className="font-mono text-sm">{walletInfo.balance} ETH</p>
+                </div>
+              </>
+            )}
           </div>
           <div className="grid gap-1">
             <Button 
