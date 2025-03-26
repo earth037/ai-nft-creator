@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useNFTs } from "@/context/NFTContext";
 import { useWallet } from "@/context/WalletContext";
 import { toast } from "sonner";
-import { Ethereum } from "lucide-react";
+import { CircleDollarSign } from "lucide-react";
 
 interface FeaturedNFTProps {
   nft: NFT;
@@ -66,7 +66,7 @@ export function FeaturedNFT({ nft }: FeaturedNFTProps) {
         
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 bg-secondary/50 backdrop-blur-sm px-4 py-2 rounded-lg">
-            <Ethereum className="h-5 w-5 text-primary" />
+            <CircleDollarSign className="h-5 w-5 text-primary" />
             <span className="font-mono font-medium">{nft.price} {nft.currency}</span>
           </div>
           

@@ -6,7 +6,7 @@ import { ImageGenerator } from "@/components/ui/ImageGenerator";
 import { useNFTs } from "@/context/NFTContext";
 import { useWallet } from "@/context/WalletContext";
 import { Button } from "@/components/ui/button";
-import { Ethereum, Bitcoin, Coins } from "lucide-react";
+import { CircleDollarSign, Bitcoin as BitcoinIcon, Coins as CoinsIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -64,9 +64,9 @@ export default function Create() {
   };
 
   const currencyOptions = [
-    { value: "ETH", label: "Ethereum", icon: Ethereum },
-    { value: "BTC", label: "Bitcoin", icon: Bitcoin },
-    { value: "USDT", label: "USDT", icon: Coins },
+    { value: "ETH", label: "Ethereum", icon: CircleDollarSign },
+    { value: "BTC", label: "Bitcoin", icon: BitcoinIcon },
+    { value: "USDT", label: "USDT", icon: CoinsIcon },
   ];
 
   return (

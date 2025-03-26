@@ -5,7 +5,7 @@ import { useNFTs } from "@/context/NFTContext";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Ethereum } from "lucide-react";
+import { CircleDollarSign } from "lucide-react";
 
 interface NFTCardProps {
   nft: NFT;
@@ -62,7 +62,7 @@ export function NFTCard({ nft, showPurchaseButton = true }: NFTCardProps) {
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-medium text-lg truncate">{nft.name}</h3>
           <div className="flex items-center">
-            <Ethereum className="h-4 w-4 text-primary mr-1" />
+            <CircleDollarSign className="h-4 w-4 text-primary mr-1" />
             <span className="font-mono">{nft.price}</span>
           </div>
         </div>

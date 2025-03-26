@@ -7,3 +7,4 @@ export interface WalletInfo {
   balance: string;
   network: string;
 }
+
