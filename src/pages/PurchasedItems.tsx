@@ -8,7 +8,7 @@ import { useThirdWeb } from "@/context/ThirdWebContext";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { NFT } from "@/types";
+import { NFT, ThirdWebNFT } from "@/types";
 
 export default function PurchasedItems() {
   const { purchasedNFTs } = useNFTs();
@@ -20,7 +20,7 @@ export default function PurchasedItems() {
     ? purchasedNFTs.filter(nft => nft.owner === address)
     : [];
     
-  // Combine with ThirdWeb NFTs if available
+  // Check if user has ThirdWeb NFTs
   const hasThirdWebNFTs = ownedNfts && ownedNfts.length > 0;
 
   return (
@@ -29,16 +29,16 @@ export default function PurchasedItems() {
       
       <main className="flex-grow pt-24 pb-16">
         <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-2">My Purchased NFTs</h1>
+          <h1 className="text-3xl font-bold mb-2">My NFTs</h1>
           <p className="text-muted-foreground mb-8">
-            View the NFTs you've purchased
+            View the NFTs you've minted and purchased
           </p>
           
           {!isConnected ? (
             <div className="text-center py-20 glass rounded-xl">
               <h3 className="text-2xl font-semibold mb-2">Wallet not connected</h3>
               <p className="text-muted-foreground mb-6">
-                Please connect your wallet to view your purchased NFTs
+                Please connect your wallet to view your NFTs
               </p>
             </div>
           ) : isLoadingOwnedNfts ? (
@@ -49,37 +49,57 @@ export default function PurchasedItems() {
                 Fetching your NFTs from the blockchain
               </p>
             </div>
-          ) : hasThirdWebNFTs ? (
-            <div>
-              <h2 className="text-xl font-medium mb-4">ThirdWeb NFTs</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10">
-                {ownedNfts.map((nft: any) => (
-                  <div key={nft.metadata.id} className="group relative overflow-hidden rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-1">
-                    <div className="relative aspect-square overflow-hidden rounded-t-xl bg-secondary/30">
-                      <img
-                        src={nft.metadata.image}
-                        alt={nft.metadata.name}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <div className="p-4 backdrop-blur-sm glass">
-                      <h3 className="font-medium text-lg truncate">{nft.metadata.name}</h3>
-                      <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
-                        {nft.metadata.description}
-                      </p>
-                      <div className="text-xs">
-                        <span className="ml-auto px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
-                          Owned by you
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+          ) : !hasThirdWebNFTs && myPurchasedNFTs.length === 0 ? (
+            <div className="text-center py-20 glass rounded-xl">
+              <h3 className="text-2xl font-semibold mb-2">No NFTs Found</h3>
+              <p className="text-muted-foreground mb-6">
+                You haven't minted or purchased any NFTs yet. 
+                Get started by creating your first NFT or exploring the marketplace!
+              </p>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <Button asChild>
+                  <Link to="/create">Create NFT</Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/">Explore Marketplace</Link>
+                </Button>
               </div>
+            </div>
+          ) : (
+            <div>
+              {hasThirdWebNFTs && (
+                <>
+                  <h2 className="text-xl font-medium mb-4">ThirdWeb NFTs</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-10">
+                    {ownedNfts.map((nft: ThirdWebNFT) => (
+                      <div key={nft.metadata.id} className="group relative overflow-hidden rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-1">
+                        <div className="relative aspect-square overflow-hidden rounded-t-xl bg-secondary/30">
+                          <img
+                            src={nft.metadata.image}
+                            alt={nft.metadata.name}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <div className="p-4 backdrop-blur-sm glass">
+                          <h3 className="font-medium text-lg truncate">{nft.metadata.name}</h3>
+                          <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
+                            {nft.metadata.description}
+                          </p>
+                          <div className="text-xs">
+                            <span className="ml-auto px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
+                              Owned by you
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
               
               {myPurchasedNFTs.length > 0 && (
                 <>
-                  <h2 className="text-xl font-medium mb-4">Demo NFTs</h2>
+                  <h2 className="text-xl font-medium mb-4">{hasThirdWebNFTs ? "Demo NFTs" : "Purchased NFTs"}</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {myPurchasedNFTs.map((nft) => (
                       <NFTCard key={nft.id} nft={nft} showPurchaseButton={false} />
@@ -87,22 +107,6 @@ export default function PurchasedItems() {
                   </div>
                 </>
               )}
-            </div>
-          ) : myPurchasedNFTs.length === 0 ? (
-            <div className="text-center py-20 glass rounded-xl">
-              <h3 className="text-2xl font-semibold mb-2">No purchased NFTs found</h3>
-              <p className="text-muted-foreground mb-6">
-                You haven't purchased any NFTs yet. Explore the marketplace to find unique NFTs!
-              </p>
-              <Button asChild>
-                <Link to="/">Explore Marketplace</Link>
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {myPurchasedNFTs.map((nft) => (
-                <NFTCard key={nft.id} nft={nft} showPurchaseButton={false} />
-              ))}
             </div>
           )}
         </div>
